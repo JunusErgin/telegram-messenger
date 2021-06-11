@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'"> -->
+
+    <style>
+        body {
+            background-color: #F7F7F7;
+            padding-bottom: 100px;
+        }
+        
+        .container {
+            margin: 0px 100px !important;
+        }
+        
+        .demo-list-action {
+            width: 300px;
+        }
+        
+        h2 {
+            font-size: 24px !important;
+            font-weight: 500 !important;
+            color: rgba(0, 0, 0, .54);
+            margin: 0 0 !important;
+        }
+        
+        .mdl-card {
+            padding: 8px;
+            width: 100% !important;
+        }
+        
+        .row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .right {
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .align-start {
+            align-items: flex-start;
+        }
+        
+        .margin-bottom-100 {
+            margin-bottom: 100px;
+        }
+    </style>
+
+    <title>Telegram Messenger!</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+</head>
+
+<body onload="init()">
+    <div class="container">
+
+        <h1>Telegram Messenger</h1>
+
+
+        <div class="mdl-card mdl-shadow--2dp margin-bottom-100" id="next-message">
+            <h2>Nächste Nachricht</h2>
+
+
+            <div id="scheduled-message">
+
+            </div>
+
+        </div>
+
+        <div class="mdl-card mdl-shadow--2dp">
+            <h2>Vorlagen</h2>
+
+            <form onsubmit="addTemplate(); return false;">
+
+                <div class="row">
+                    <div class="mdl-textfield mdl-js-textfield">
+                        <input class="mdl-textfield__input" type="text" id="template">
+                        <label class="mdl-textfield__label" for="sample1">Text...</label>
+                    </div>
+
+                    <div>
+                        <select name="Typ" id="type" class="mdl-textfield__input">
+                        <option value="1">Gute Nacht</option>
+                        <option value="2">Anwort</option>
+                      </select>
+                    </div>
+
+                    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">Hinzufügen</button>
+                </div>
+            </form>
+
+
+            <div class="row align-start">
+                <div class="demo-list-action mdl-list" id="templateList1">
+
+                </div>
+
+                <div class="demo-list-action mdl-list" id="templateList2">
+
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="mdl-textfield mdl-js-textfield">
+                    <input class="mdl-textfield__input" type="date" id="date">
+                </div>
+                <div class="mdl-textfield mdl-js-textfield">
+                    <input class="mdl-textfield__input" type="time" id="time">
+                </div>
+
+                <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" onclick="start()">  Start</button>
+            </div>
+
+
+        </div>
+    </div>
+
+
+
+
+
+
+
+    <!-- We are using Node.js <span id="node-version"></span>,
+    Chromium <span id="chrome-version"></span>,
+    and Electron <span id="electron-version"></span>. -->
+
+    <!-- You can also require other files to run in this process -->
+    <script src="./renderer.js"></script>
+</body>
+
+</html>
