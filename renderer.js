@@ -11,6 +11,14 @@ const dst = 2;
 let running = false;
 let nextMessage;
 
+let CONFIG = {
+    name: 'Manuel',
+    username: 'manuelthbot',
+};
+
+const updateURL = 'api.telegram.org/bot/' + CONFIG.token + '/getUpdates';
+
+
 function addTemplate() {
     let template = document.getElementById('template');
     if (!templates[getType()]) {
