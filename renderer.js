@@ -10,13 +10,10 @@ let selectedDate = new Date();
 const dst = 2;
 let running = false;
 let nextMessage;
+let lastMessages = [];
 
-let CONFIG = {
-    name: 'Manuel',
-    username: 'manuelthbot',
-};
 
-const updateURL = 'api.telegram.org/bot/' + CONFIG.token + '/getUpdates';
+const updateURL = 'https://api.telegram.org/bot' + CONFIG.token + '/getUpdates';
 
 
 function addTemplate() {
@@ -37,9 +34,28 @@ function init() {
     loadTemplates();
     loadTime();
     updateTime();
+    loadLastMessages();
     render();
     setInterval(sendRemainingMessages, 5000);
 }
+
+async function loadLastMessages() {
+    let resp = await fetch(updateURL);
+    lastMessages = (await resp.json())['result'];
+    renderLastMessages();
+}
+
+function renderLastMessages() {
+    let card = document.getElementById('last-messages');
+    card.innerHTML = '';
+
+    lastMessages.reverse().forEach((messageInfo) => {
+        let msg = messageInfo['message'];
+        console.log('message:', msg);
+        card.innerHTML += `<div>${msg['from']['first_name']}: <i>${msg['text']}</i></div>`;
+    });
+}
+
 
 function sendRemainingMessages() {
     console.log('Shoud i send a message?');
