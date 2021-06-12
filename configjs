@@ -1,0 +1,5 @@
+let CONFIG = {
+    name: 'Manuel',
+    username: 'manuelthbot',
+    token: ''
+};
