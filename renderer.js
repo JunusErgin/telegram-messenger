@@ -49,23 +49,44 @@ function renderLastMessages() {
     let card = document.getElementById('last-messages');
     card.innerHTML = '';
 
-    lastMessages.reverse().forEach((messageInfo) => {
+    lastMessages.reverse().forEach((messageInfo, i) => {
         let msg = messageInfo['message'];
         console.log('message:', msg);
-        card.innerHTML += `<div>${msg['from']['first_name']}: <i>${msg['text']}</i></div>`;
+        card.innerHTML += `<div><span onclick="targetUser(${i})">${msg['from']['first_name']}</span>: <i>${msg['text']}</i></div>`;
     });
 }
 
+
+function targetUser(i) {
+    localStorage.setItem('targetUser', JSON.stringify(lastMessages[i]['message']['from']));
+}
+
+function getTargetUser() {
+    return JSON.parse(localStorage.getItem('targetUser'));
+}
 
 function sendRemainingMessages() {
     console.log('Shoud i send a message?');
 
     if (new Date().getTime() > (selectedDate.getTime() - (1000 * 60 * 60 * dst))) {
         console.log('Yes!!!');
+        let user = getTargetUser();
+        if (user) {
+            console.log('Sending message to: ', user);
+
+        } else {
+            console.log('No target User is selected!!');
+        }
+        // nextMessage;
+        // selectedDate;
+
     } else {
         console.log('Not yet');
-
     }
+}
+
+function sendMessage(userId, text) {
+
 }
 
 function start() {
