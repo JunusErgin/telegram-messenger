@@ -14,6 +14,7 @@ let lastMessages = [];
 
 
 const updateURL = 'https://api.telegram.org/bot' + CONFIG.token + '/getUpdates';
+const sendURL = 'https://api.telegram.org/bot' + CONFIG.token + '/sendMessage';
 
 
 function addTemplate() {
@@ -58,11 +59,11 @@ function renderLastMessages() {
 
 
 function targetUser(i) {
-    localStorage.setItem('targetUser', JSON.stringify(lastMessages[i]['message']['from']));
+    localStorage.setItem('target', JSON.stringify(lastMessages[i]['message']));
 }
 
 function getTargetUser() {
-    return JSON.parse(localStorage.getItem('targetUser'));
+    return JSON.parse(localStorage.getItem('target'));
 }
 
 function sendRemainingMessages() {
@@ -85,8 +86,14 @@ function sendRemainingMessages() {
     }
 }
 
-function sendMessage(userId, text) {
+async function sendMessage(chatId, text) {
+    const url = sendURL + '?chat_id=' + chatId + "&text=" + text;
+    const resp = await fetch(url, {
+        method: 'POST'
+    });
 
+    let jsonResp = (await resp.json());
+    console.log(jsonResp);
 }
 
 function start() {
