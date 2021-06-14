@@ -37,7 +37,7 @@ function init() {
     updateTime();
     loadLastMessages();
     render();
-    setInterval(sendRemainingMessages, 5000);
+    setInterval(sendRemainingMessages, 20000);
 }
 
 async function loadLastMessages() {
@@ -66,24 +66,43 @@ function getTargetUser() {
     return JSON.parse(localStorage.getItem('target'));
 }
 
-function sendRemainingMessages() {
+async function sendRemainingMessages() {
     console.log('Shoud i send a message?');
 
     if (new Date().getTime() > (selectedDate.getTime() - (1000 * 60 * 60 * dst))) {
         console.log('Yes!!!');
-        let user = getTargetUser();
-        if (user) {
-            console.log('Sending message to: ', user);
+        let target = getTargetUser();
+        if (target) {
+            console.log('Sending message to: ', target['chat']['id']);
+            console.log(nextMessage['text']);
+
+            try {
+                await sendMessage(target['chat']['id'], nextMessage['text']);
+                setDateToTomorrow();
+                render();
+            } catch (e) {
+                console.error('Error sending message', e);
+            }
 
         } else {
             console.log('No target User is selected!!');
         }
         // nextMessage;
         // selectedDate;
-
     } else {
         console.log('Not yet');
     }
+}
+
+function setDateToTomorrow() {
+    const tomorrow = new Date().getDate() + 1;
+    const tomorrowDate = new Date(nextMessage['date']);
+    tomorrowDate.setDate(tomorrow);
+    nextMessage['date'] = tomorrowDate.toISOString();
+    localStorage.setItem('nextMessage', JSON.stringify(nextMessage));
+    selectedDate = tomorrowDate;
+    localStorage.setItem('selectedDate', tomorrowDate.toISOString());
+
 }
 
 async function sendMessage(chatId, text) {
