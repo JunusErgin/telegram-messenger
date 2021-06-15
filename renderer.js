@@ -10,7 +10,8 @@ let selectedDate = new Date();
 const dst = 2;
 let running = false;
 let nextMessage;
-let lastMessages = [];
+let lastMessages = JSON.parse(localStorage.getItem('lastMessages')) || [];
+let sendAnswer = localStorage.getItem('sendAnswer') == 'true';
 
 
 const updateURL = 'https://api.telegram.org/bot' + CONFIG.token + '/getUpdates';
@@ -36,25 +37,41 @@ function init() {
     loadTime();
     updateTime();
     loadLastMessages();
+    setInterval(loadLastMessages, 20 * 1000)
     render();
     setInterval(sendRemainingMessages, 20000);
 }
 
 async function loadLastMessages() {
     let resp = await fetch(updateURL);
-    lastMessages = (await resp.json())['result'];
+    const update = (await resp.json())['result'];
+    if (lastMessages.length < update.length) {
+        sendAnswer = true;
+        localStorage.setItem('sendAnswer', sendAnswer);
+    }
+
+    lastMessages = update;
+    localStorage.setItem('lastMessages', JSON.stringify(lastMessages));
+
     renderLastMessages();
 }
 
 function renderLastMessages() {
     let card = document.getElementById('last-messages');
-    card.innerHTML = '';
+    card.innerHTML = '<h2>Letzte Nachrichten</h2>';
 
     lastMessages.reverse().forEach((messageInfo, i) => {
         let msg = messageInfo['message'];
         console.log('message:', msg);
         card.innerHTML += `<div><span onclick="targetUser(${i})">${msg['from']['first_name']}</span>: <i>${msg['text']}</i></div>`;
     });
+
+    if (lastMessages.length == 0) {
+        card.innerHTML += `<div>
+        <h2>Keine Nachrichten vorhanden</h2>
+        <i>Nachrichten verschwinden automatisch nach 24 Stunden</i>
+        </div>`;
+    }
 }
 
 
@@ -68,11 +85,16 @@ function getTargetUser() {
 
 async function sendRemainingMessages() {
     console.log('Shoud i send a message?');
+    let target = getTargetUser();
+    if (target) {
+        if (sendAnswer) {
+            await sendMessage(target['chat']['id'], randomAnswer());
+            sendAnswer = false;
+            localStorage.setItem('sendAnswer', sendAnswer);
+        }
 
-    if (new Date().getTime() > (selectedDate.getTime() - (1000 * 60 * 60 * dst))) {
-        console.log('Yes!!!');
-        let target = getTargetUser();
-        if (target) {
+        if (new Date().getTime() > (selectedDate.getTime() - (1000 * 60 * 60 * dst))) {
+            console.log('Yes!!!');
             console.log('Sending message to: ', target['chat']['id']);
             console.log(nextMessage['text']);
 
@@ -80,18 +102,21 @@ async function sendRemainingMessages() {
                 await sendMessage(target['chat']['id'], nextMessage['text']);
                 setDateToTomorrow();
                 render();
+                loadLastMessages();
             } catch (e) {
                 console.error('Error sending message', e);
             }
-
         } else {
-            console.log('No target User is selected!!');
+            console.log('Not yet');
         }
-        // nextMessage;
-        // selectedDate;
     } else {
-        console.log('Not yet');
+        console.log('No target User is selected!!');
     }
+}
+
+function randomAnswer() {
+    let answers = templates[2];
+    return answers[Math.floor(answers.length * Math.random())];
 }
 
 function setDateToTomorrow() {
@@ -112,7 +137,7 @@ async function sendMessage(chatId, text) {
     });
 
     let jsonResp = (await resp.json());
-    console.log(jsonResp);
+    console.log('Sent message to chat' + chatId, text);
 }
 
 function start() {
