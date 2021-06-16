@@ -10,9 +10,9 @@ let selectedDate = new Date();
 const dst = 2;
 let running = false;
 let nextMessage;
-let lastMessages = JSON.parse(localStorage.getItem('lastMessages')) || [];
+let lastMessages = getArray('lastMessages');
 let sendAnswer = localStorage.getItem('sendAnswer') == 'true';
-
+let outboundMessages = getArray('outboundMessages');
 
 const updateURL = 'https://api.telegram.org/bot' + CONFIG.token + '/getUpdates';
 const sendURL = 'https://api.telegram.org/bot' + CONFIG.token + '/sendMessage';
@@ -60,18 +60,56 @@ function renderLastMessages() {
     let card = document.getElementById('last-messages');
     card.innerHTML = '<h2>Letzte Nachrichten</h2>';
 
-    lastMessages.reverse().forEach((messageInfo, i) => {
+    let allMessages = [...lastMessages, ...outboundMessages].sort((m1, m2) => m2.update_id - m1.update_id);
+
+    allMessages.reverse().forEach((messageInfo, i) => {
         let msg = messageInfo['message'];
-        console.log('message:', msg);
         card.innerHTML += `<div><span onclick="targetUser(${i})">${msg['from']['first_name']}</span>: <i>${msg['text']}</i></div>`;
     });
 
-    if (lastMessages.length == 0) {
+    if (allMessages.length == 0) {
         card.innerHTML += `<div>
         <h2>Keine Nachrichten vorhanden</h2>
         <i>Nachrichten verschwinden automatisch nach 24 Stunden</i>
         </div>`;
     }
+
+
+    card.innerHTML += `
+    <form onsubmit="sendTextMessage(); return false;">
+      <div class="mdl-textfield mdl-js-textfield">
+      <input class="mdl-textfield__input" type="text" id="textMessage">
+      <label class="mdl-textfield__label" for="sample1"></label>
+  </div>
+
+      <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">  Senden</button>
+    </form>
+    `;
+}
+
+function sendTextMessage() {
+    let textMessage = document.getElementById('textMessage');
+    const target = getTargetUser();
+    sendMessage(target['chat']['id'], textMessage.value);
+
+    // let card = document.getElementById('last-messages');
+    // card.innerHTML = `<div><i>Du:</i> ${textMessage.value}</div>` + card.innerHTML;
+    let latestMessage = lastMessages.sort((m1, m2) => m2.update_id - m1.update_id)[0];
+    let outboundMessage = {
+        update_id: +latestMessage.update_id + (+(new Date().getTime() + '').slice(6, 13) / 10000000),
+        message: {
+            text: textMessage.value,
+            from: {
+                first_name: 'Du'
+            }
+        }
+    };
+
+    outboundMessages.push(outboundMessage);
+    save('outboundMessages');
+    textMessage.value = '';
+    renderLastMessages();
+
 }
 
 
@@ -249,4 +287,12 @@ function loadTemplates() {
 
 function getType() {
     return +document.getElementById('type').value;
+}
+
+function getArray(key) {
+    return JSON.parse(localStorage.getItem(key)) || [];
+}
+
+function save(key) {
+    localStorage.setItem(key, JSON.stringify(eval(key)));
 }
